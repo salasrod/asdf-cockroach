@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+# shellcheck source=bin/helpers.sh
+source "$(dirname "$0")/helpers.sh"
+
+printf "Downloading cockroachdb %s\n" "${ASDF_INSTALL_VERSION}"
+
+platform_name=$(get_platform_name)
+archive_name=$(get_archive_name "${ASDF_INSTALL_VERSION}")
+
+trap 'rm -rf "${ASDF_DOWNLOAD_PATH}/${archive_name}"' EXIT
+curl -sSL "https://binaries.cockroachdb.com/${archive_name}" \
+    -o "${ASDF_DOWNLOAD_PATH}/${archive_name}"
+
+if [[ "$(get_platform_name)" == "darwin" ]] ; then
+    tar xvJf "${ASDF_DOWNLOAD_PATH}/${archive_name}" -C "${ASDF_DOWNLOAD_PATH}"
+else
+    tar xvzpf "${ASDF_DOWNLOAD_PATH}/${archive_name}" -C "${ASDF_DOWNLOAD_PATH}"
+fi
+
